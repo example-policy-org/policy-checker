@@ -1,6 +1,6 @@
 FROM ghcr.io/kyverno/kyverno-cli:1.6-dev-latest as kyverno-cli
 
-FROM alpine/k8s:1.20.7
+FROM alpine/k8s:1.21.2
 
 RUN apk add --no-cache yq
 COPY --from=kyverno-cli /kyverno /usr/local/bin/kyverno
