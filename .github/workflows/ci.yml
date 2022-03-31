@@ -28,7 +28,7 @@ jobs:
       id-token: none
 
     steps:
-      - uses: actions/checkout@v2.4.0
+      - uses: actions/checkout@v3.0.0
 
       - name: Login to GitHub
         if: github.event_name != 'pull_request'
