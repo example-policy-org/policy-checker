@@ -2,19 +2,46 @@
 
 set -e
 
-echo "Checking policy version..."
+if test -f "kustomization.yaml"; then
+  echo "Found kustomization.yaml"
 
-FETCHED_POLICY_VERSION=$(yq eval '.commonLabels["mycompany.com/policy-version"]' kustomization.yaml)
+  echo "Checking policy version..."
 
-POLICY_VERSION="${FETCHED_POLICY_VERSION:=$POLICY_VERSION}"
+  FETCHED_POLICY_VERSION=$(yq eval '.commonLabels["mycompany.com/policy-version"]' kustomization.yaml)
 
-echo "Policy version: ${POLICY_VERSION}"
+  POLICY_VERSION="${FETCHED_POLICY_VERSION:=$POLICY_VERSION}"
 
-echo "Fetching Policy..."
+  echo "Policy version: ${POLICY_VERSION}"
 
-git clone --quiet --depth 1 --branch ${POLICY_VERSION} https://github.com/example-policy-org/policy.git /policy
+  echo "Fetching Policy..."
 
-echo "Policy fetched."
-echo "Running policy checker..."
+  git clone --quiet --depth 1 --branch ${POLICY_VERSION} https://github.com/example-policy-org/policy.git /policy
 
-kubectl kustomize . | kyverno apply  /policy/kubernetes/kyverno/*/policy.yaml --resource -
+  echo "Policy fetched."
+  echo "Running policy checker..."
+
+  kubectl kustomize . | kyverno apply  /policy/kubernetes/kyverno/*/policy.yaml --resource -
+fi
+
+
+if compgen -G "./*.tf" > /dev/null; then
+  echo "Found Terraform files"
+
+  echo "Checking policy version..."
+  hcl2tojson -s . /tmp/hcl2tojson
+  
+  FETCHED_POLICY_VERSION=$(jq -n '[inputs]' /tmp/hcl2tojson/*.json | jq -r 'map(select(.variable))[].variable|map(select(.["mycompany.com/policy-version"]))[0]["mycompany.com/policy-version"].default[0]') 
+  POLICY_VERSION="${FETCHED_POLICY_VERSION:=$POLICY_VERSION}"
+
+  echo "Policy version: ${POLICY_VERSION}"
+
+  echo "Fetching Policy..."
+  git clone --quiet --depth 1 --branch ${POLICY_VERSION} https://github.com/example-policy-org/policy.git /policy
+
+  echo "Policy fetched."
+
+  echo "Running policy checker..."
+  checkov \
+    --config-file ../policy/infra/checkov/config.yaml \
+    --directory ./
+fi
