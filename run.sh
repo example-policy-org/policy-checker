@@ -28,7 +28,9 @@ if compgen -G "./*.tf" > /dev/null; then
   echo "Found Terraform files"
 
   echo "Checking policy version..."
-  hcl2tojson -s . /tmp/hcl2tojson
+  mkdir /tmp/tf
+  cp -r * /tmp/tf
+  hcl2tojson -s /tmp/tf /tmp/hcl2tojson
   
   FETCHED_POLICY_VERSION=$(jq -n '[inputs]' /tmp/hcl2tojson/*.json | jq -r 'map(select(.variable))[].variable|map(select(.["mycompany.com/policy-version"]))[0]["mycompany.com/policy-version"].default[0]') 
   POLICY_VERSION="${FETCHED_POLICY_VERSION:=$POLICY_VERSION}"
