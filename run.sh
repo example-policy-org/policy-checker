@@ -44,6 +44,6 @@ if compgen -G "./*.tf" > /dev/null; then
 
   echo "Running policy checker..."
   checkov \
-    --config-file ../policy/infra/checkov/config.yaml \
+    --config-file /policy/infra/checkov/config.yaml \
     --directory ./
 fi
