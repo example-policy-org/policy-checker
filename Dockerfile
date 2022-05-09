@@ -1,4 +1,4 @@
-FROM ghcr.io/kyverno/kyverno-cli:1.7-dev-latest as kyverno-cli
+FROM ghcr.io/kyverno/kyverno-cli:1.8-dev-latest as kyverno-cli
 
 FROM alpine/k8s:1.22.6
 
